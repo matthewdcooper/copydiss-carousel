@@ -17,48 +17,82 @@ if ( ! defined( 'WPINC' ) ) {
 	die;
 }
 
-define( 'PLUGIN_NAME_VERSION', '1.0.0' );
+define( 'COPYDISS_CAROUSEL_VERSION', '1.0.0' );
 
-/**
- * The code that runs during plugin activation.
- * This action is documented in includes/copydiss-carousel-activator.php
- */
-function activate_plugin_name() {
-	require_once plugin_dir_path( __FILE__ ) . 'includes/class-copydiss-carousel-activator.php';
-	Plugin_Name_Activator::activate();
+
+// ACTIVATION
+function copydiss_carousel_activate() {
+	$options = get_option('copydiss_carousel_options', array());
+
+	$new_options['rotation_time'] = '10000'; // 10 seconds by default 
+
+	$merged_options = wp_parse_args($options, $new_options);
+	update_option('copydiss_carousel_options', $merged_options);
+	return $merged_options;
 }
+register_activation_hook( __FILE__, 'copydiss_carousel_activate' );
 
-/**
- * The code that runs during plugin deactivation.
- * This action is documented in includes/copydiss-carousel-deactivator.php
- */
-function deactivate_plugin_name() {
-	require_once plugin_dir_path( __FILE__ ) . 'includes/class-copydiss-carousel-deactivator.php';
-	Plugin_Name_Deactivator::deactivate();
-}
-
-register_activation_hook( __FILE__, 'activate_plugin_name' );
-register_deactivation_hook( __FILE__, 'deactivate_plugin_name' );
-
-/**
- * The core plugin class that is used to define internationalization,
- * admin-specific hooks, and public-facing site hooks.
- */
-require plugin_dir_path( __FILE__ ) . 'includes/class-copydiss-carousel.php';
-
-/**
- * Begins execution of the plugin.
- *
- * Since everything within the plugin is registered via hooks,
- * then kicking off the plugin from this point in the file does
- * not affect the page life cycle.
- *
- * @since    1.0.0
- */
-function run_copydiss_carousel() {
-
-	$plugin = new Copydiss_Carousel();
-	$plugin->run();
+// DEACTIVATION
+function deactivate_copydiss_carousel() {
 
 }
-run_copydiss_carousel();
+register_deactivation_hook( __FILE__, 'deactivate_copydiss_carousel' );
+
+// ADMIN
+
+// enqueue styles
+function copydiss_carousel_enqueue_admin_styles() {
+
+
+}
+// enqueue scripts
+
+// PUBLIC
+
+// enqueue styles
+function copydiss_carousel_enqueue_public_styles() {
+	wp_enqueue_style('copydiss-carousel-css', 
+					  plugin_dir_url(__FILE__) . 'public/copydiss-carousel.css');
+
+}
+
+// enqueue scripts
+function copydiss_carousel_enqueue_public_scripts() {
+	wp_enqueue_script('copydiss-carousel-js', 
+					  plugin_dir_url(__FILE__) . 'public/copydiss-carousel.js');
+
+
+}
+
+function copydiss_carousel_test_shortcode($atts) {
+
+	// TODO: use id to pull corresponding images from database
+	$atts = shortcode_atts(
+		array(
+			'id' => ''
+		), $atts, 'cpdtest');
+	$id = $atts['id'];
+	if (empty($id)) {
+		return '<h1>ID Missing</h1>';
+	}
+
+	$output = '<div class="copydiss-carousel">';
+	$output .= '<div class="copydiss-carousel-inner">';
+
+	// TODO: iterate over carousel images and add each to output
+
+
+	$output .= '<input class="copydiss-carousel-open" type="radio" id="carousel-1" name="carousel" aria-hidden="true" hidden="" checked="checked" />';
+	$output .= '<div class="copydiss-carousel-item">';
+	$output .= '<img src="' . get_template_directory_uri() . '/assets/img/carousel-1.jpg" />';
+	$output .= '</div>';
+
+	$output .= '</div> <!-- copydiss-carousel-inner -->'; 
+	$output .= '</div> <!-- copydiss-carousel -->';
+
+	return $output;
+}
+
+copydiss_carousel_enqueue_public_styles();
+copydiss_carousel_enqueue_public_scripts();
+add_shortcode('cpdtest', 'copydiss_carousel_test_shortcode');
