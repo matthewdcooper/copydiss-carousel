@@ -34,7 +34,7 @@ register_activation_hook( __FILE__, 'copydiss_carousel_activate' );
 
 // DEACTIVATION
 function deactivate_copydiss_carousel() {
-
+	remove_menu_page( 'copydiss_carousel_settings' );
 }
 register_deactivation_hook( __FILE__, 'deactivate_copydiss_carousel' );
 
@@ -46,6 +46,17 @@ function copydiss_carousel_enqueue_admin_styles() {
 
 }
 // enqueue scripts
+
+// menu
+function copydiss_carousel_settings_menu() {
+	add_submenu_page('themes.php', 
+					 'CopyDiss Carousel Settings',
+					 'CopyDiss Carousel',
+					 'manage_options',
+					 'copydiss_carousel_settings' );
+
+}
+add_action('admin_menu', 'copydiss_carousel_settings_menu');
 
 // PUBLIC
 
