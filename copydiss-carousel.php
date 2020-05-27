@@ -90,8 +90,6 @@ function copydiss_carousel_shortcode($atts) {
 		set: (i) => document.getElementById("copydiss-carousel-" + i).checked = true,
 	};
 
-	alert(copydissCarousel.speed);
-
 	setInterval(() => {
 		copydissCarousel.current += 1;
 		if (copydissCarousel.current > copydissCarousel.imageCount) {
