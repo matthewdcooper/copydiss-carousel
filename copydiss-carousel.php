@@ -116,6 +116,7 @@ function copydiss_carousel_enqueue_admin_styles() {
 
 // ENQUEUE SCRIPTS
 function copydiss_carousel_enqueue_admin_scripts() {
+	wp_enqueue_media(); // for uploading images to carousels
 	wp_enqueue_script('copydiss-carousel-admin-js', 
 					  plugin_dir_url(__FILE__) . 'admin/copydiss-carousel-admin.js');
 }
