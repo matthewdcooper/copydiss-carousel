@@ -3,7 +3,7 @@
  * Plugin Name: CopyDiss Carousel
  * Plugin URI: https://github.com/matthewdcooper/copydiss-carousel
  * Description: Displays a minimalist carousel of auto-cycling images.
- * Version: 1.0.0
+ * Version: 1.0.1
  * Requires at least: 5.3
  * Requires PHP: 7.4
  * Author: Matthew Cooper
@@ -38,8 +38,8 @@ register_deactivation_hook( __FILE__, 'copydiss_carousel_deactivate' );
 
 // The CopyDiss Carousel
 function copydiss_carousel_shortcode($atts) {
-	global $pagename;
-	if (!$pagename) return; // make sure the page is being viewed and not edited
+	global $pagenow;
+	if ($pagenow == "post.php") return; // don't display during edit
 
 	// TODO: use id to pull corresponding images from database
 	$atts = shortcode_atts(
