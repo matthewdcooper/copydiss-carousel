@@ -1,0 +1,37 @@
+
+#copydiss-carousel-container {
+    width: 100%;   
+}
+
+#copydiss-carousel-container ul{
+    display: flex;
+    flex-wrap: wrap;
+}
+
+#copydiss-carousel-container ul li {
+    margin: 1rem;
+}
+#copydiss-carousel-container ul li.image{
+    position: relative;
+    width: 192px;
+}
+
+#copydiss-carousel-container .attachment-thumbnail.size-thumbnail,
+#copydiss-carousel-container img {
+    height: 192px;
+    width: 192px;
+}
+
+#copydiss-carousel-container .delete {
+    position: absolute;
+    right: 2px;
+    top: -1px;
+}
+
+#copydiss-carousel-container .delete i{
+    color: #ce3939;
+}
+
+#copydiss-carousel-container .image input{
+    width: 100%;
+}

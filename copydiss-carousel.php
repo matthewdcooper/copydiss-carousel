@@ -19,68 +19,130 @@ if ( ! defined( 'WPINC' ) ) {
 
 define( 'COPYDISS_CAROUSEL_VERSION', '1.0.0' );
 
+require_once('includes/copydiss-carousel-post-type.php');
+require_once('includes/copydiss-carousel-meta-box.php');
 
 // ACTIVATION
 function copydiss_carousel_activate() {
-	// display settings
-	if ( false === get_option('copydiss_carousel_rotation_speed') ) {
-		add_option( 'copydiss_carousel_rotation_speed', '10' );
-	}
+
 }
 register_activation_hook( __FILE__, 'copydiss_carousel_activate' );
 
+
 // DEACTIVATION
-function deactivate_copydiss_carousel() {
-	remove_menu_page( 'copydiss_carousel_settings' );
-}
-register_deactivation_hook( __FILE__, 'deactivate_copydiss_carousel' );
-
-
-require_once('admin/admin.php');
-
-
-// PUBLIC
-
-// enqueue styles
-function copydiss_carousel_enqueue_public_styles() {
-	wp_enqueue_style('copydiss-carousel-css', 
-					  plugin_dir_url(__FILE__) . 'public/copydiss-carousel.css');
+function copydiss_carousel_deactivate() {
 
 }
-
-// enqueue scripts
-function copydiss_carousel_enqueue_public_scripts() {
-	wp_enqueue_script('copydiss-carousel-js', 
-					  plugin_dir_url(__FILE__) . 'public/copydiss-carousel.js');
+register_deactivation_hook( __FILE__, 'copydiss_carousel_deactivate' );
 
 
-}
-
-function copydiss_carousel_test_shortcode($atts) {
+// The CopyDiss Carousel
+function copydiss_carousel_shortcode($atts) {
+	global $pagename;
+	if (!$pagename) return; // make sure the page is being viewed and not edited
 
 	// TODO: use id to pull corresponding images from database
 	$atts = shortcode_atts(
 		array(
-			'id' => ''
-		), $atts, 'cpdtest');
+			'id' => '',
+			'speed' => '1', // seconds
+		), $atts, 'copydiss_carousel');
 	$id = $atts['id'];
 	if (empty($id)) {
-		return '<h1>ID Missing</h1>';
+		return 'CopyDiss Carousel error: missing id';
 	}
+	// get carousel images
+	$image_files = get_post_meta( intval( $id ), '_copydiss_carousel_images', TRUE);
+	$image_files = array_filter( explode(',', $image_files) );
 	?>
-
 	<div class="copydiss-carousel">
 		<div class="copydiss-carousel-inner">
-	// TODO: iterate over carousel images and add each to output
-			<input class="copydiss-carousel-open" type="radio" id="carousel-1" name="carousel" aria-hidden="true" hidden="" checked="checked" />
-			<div class="copydiss-carousel-item">
-				<img src="' . get_template_directory_uri() . '/assets/img/carousel-1.jpg" />
-			</div>
+			<input type="hidden" id="inp_speed" value="<?php echo $atts['speed'] ?>" />
+			<input type="hidden" id="inp_image_count" value="<?php echo sizeof($image_files) ?>" />
+
+			<?php
+			$carousel_id = 1;
+			foreach ($image_files as $image) {
+				$alt = get_post_meta($image, '_wp_attachment_image_alt', true);
+				$attachment_url = wp_get_attachment_url($image, 'thumbnail');
+				$attachment_meta = get_post($image);
+
+			?>
+
+				<input class="copydiss-carousel-open" type="radio" id="copydiss-carousel-<?php echo $carousel_id ?>" name="carousel" aria-hidden="true" hidden="" checked="checked" />
+                <div class="copydiss-carousel-item">
+                    <img src="<?php echo $attachment_url ?>" />
+                </div>
+
+				<?php
+				$carousel_id += 1;
+			}
+
+			?>
 		</div> <!-- copydiss-carousel-inner -->
 	</div> <!-- copydiss-carousel -->
+	<script>
+
+	const copydissCarousel = {
+		current: 1, // assume at least one image exists
+		speed: parseInt(document.getElementById("inp_speed").value) * 1000, // seconds to milliseonds
+		imageCount: parseInt(document.getElementById("inp_image_count").value),
+		set: (i) => document.getElementById("copydiss-carousel-" + i).checked = true,
+	};
+
+	alert(copydissCarousel.speed);
+
+	setInterval(() => {
+		copydissCarousel.current += 1;
+		if (copydissCarousel.current > copydissCarousel.imageCount) {
+			copydissCarousel.current = 1;
+		}
+		copydissCarousel.set(copydissCarousel.current);
+	}, copydissCarousel.speed);
+
+	</script>
 	<?php
 }
 
-copydiss_carousel_enqueue_public_styles();
-copydiss_carousel_enqueue_public_scripts();
-add_shortcode('cpdtest', 'copydiss_carousel_test_shortcode');
+// ENQUEUE STYLES
+function copydiss_carousel_enqueue_public_styles() {
+	wp_enqueue_style('copydiss-carousel-css', 
+					  plugin_dir_url(__FILE__) . 'public/copydiss-carousel.css');
+}
+
+function copydiss_carousel_enqueue_admin_styles() {
+	wp_enqueue_style('copydiss-carousel-admin-css', 
+					  plugin_dir_url(__FILE__) . 'admin/copydiss-carousel-admin.css');
+}
+
+
+// ENQUEUE SCRIPTS
+function copydiss_carousel_enqueue_admin_scripts() {
+	wp_enqueue_script('copydiss-carousel-admin-js', 
+					  plugin_dir_url(__FILE__) . 'admin/copydiss-carousel-admin.js');
+}
+
+
+
+// HOOKS
+
+// public scripts and styles
+add_action('wp_enqueue_scripts', 'copydiss_carousel_enqueue_public_styles');
+
+// admin scripts and styles
+add_action('admin_enqueue_scripts', 'copydiss_carousel_enqueue_admin_scripts');
+add_action('admin_enqueue_scripts', 'copydiss_carousel_enqueue_admin_styles');
+
+// shortcode for displaying carousel
+add_shortcode('copydiss_carousel', 'copydiss_carousel_shortcode');
+
+// admin panel, carousel post type
+add_action('edit_form_after_title', 'copydiss_carousel_shortcode_example');
+add_action('add_meta_boxes', 'copydiss_carousel_create_meta_box');
+add_action( 'admin_init', 'copydiss_carousel_admin_init' );
+add_action( 'init', 'copydiss_carousel_post_type_init' );
+add_action('save_post', 'copydiss_carousel_save');
+
+flush_rewrite_rules();
+
+?>
