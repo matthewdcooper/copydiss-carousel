@@ -61,7 +61,8 @@ function copydiss_carousel_meta_box_html($post) {
                     echo '<li class="image" data-attachment_id="' . esc_attr($attachment_id) . '">
                             ' . $attachment . '<br>
                             <input type="text" name="caption_' . $attachment_id . '"  value="' . $attachment_meta->post_excerpt . '"  placeholder="Caption"> 
-                            <a href="#" class="delete tips" data-tip="Delete Slide"><i class="fa fa-times" aria-hidden="true"></i>
+                            <a href="#" class="delete tips" data-tip="Delete Slide">
+                                <p>x</p>
                           </a>
                     </li>';
 
